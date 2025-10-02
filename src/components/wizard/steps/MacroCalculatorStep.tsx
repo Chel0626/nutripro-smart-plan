@@ -27,6 +27,9 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
 
   const [macros, setMacros] = useState<MacroData | null>(initialMacros);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [proteinPercent, setProteinPercent] = useState(30);
+  const [carbsPercent, setCarbsPercent] = useState(40);
+  const [fatPercent, setFatPercent] = useState(30);
 
   const calculateMacros = () => {
     setIsCalculating(true);
@@ -58,10 +61,10 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
 
     const totalCalories = Math.round(tdee * goalAdjustments[formData.goal]);
 
-    // Distribuição de macros (exemplo: 40% carbs, 30% protein, 30% fat)
-    const proteinGrams = Math.round((totalCalories * 0.3) / 4);
-    const carbsGrams = Math.round((totalCalories * 0.4) / 4);
-    const fatGrams = Math.round((totalCalories * 0.3) / 9);
+    // Distribuição de macros usando as porcentagens definidas pelo usuário
+    const proteinGrams = Math.round((totalCalories * (proteinPercent / 100)) / 4);
+    const carbsGrams = Math.round((totalCalories * (carbsPercent / 100)) / 4);
+    const fatGrams = Math.round((totalCalories * (fatPercent / 100)) / 9);
 
     const calculatedMacros: MacroData = {
       totalCalories,
@@ -218,7 +221,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
             <h3 className="font-semibold text-success">Resultados Calculados</h3>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="text-center p-4 bg-card rounded-lg">
               <div className="text-3xl font-bold text-primary">{macros.totalCalories}</div>
               <div className="text-sm text-muted-foreground mt-1">Calorias Totais</div>
@@ -226,18 +229,76 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
 
             <div className="text-center p-4 bg-card rounded-lg">
               <div className="text-3xl font-bold text-info">{macros.proteinGrams}g</div>
-              <div className="text-sm text-muted-foreground mt-1">Proteínas</div>
+              <div className="text-sm text-muted-foreground mt-1">Proteínas ({proteinPercent}%)</div>
             </div>
 
             <div className="text-center p-4 bg-card rounded-lg">
               <div className="text-3xl font-bold text-warning">{macros.carbsGrams}g</div>
-              <div className="text-sm text-muted-foreground mt-1">Carboidratos</div>
+              <div className="text-sm text-muted-foreground mt-1">Carboidratos ({carbsPercent}%)</div>
             </div>
 
             <div className="text-center p-4 bg-card rounded-lg">
               <div className="text-3xl font-bold text-accent">{macros.fatGrams}g</div>
-              <div className="text-sm text-muted-foreground mt-1">Gorduras</div>
+              <div className="text-sm text-muted-foreground mt-1">Gorduras ({fatPercent}%)</div>
             </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <h4 className="font-semibold mb-3">Ajustar Distribuição de Macronutrientes</h4>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="protein-percent">Proteína (%)</Label>
+                <Input
+                  id="protein-percent"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={proteinPercent}
+                  onChange={(e) => setProteinPercent(parseInt(e.target.value) || 0)}
+                  className="mt-2"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="carbs-percent">Carboidratos (%)</Label>
+                <Input
+                  id="carbs-percent"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={carbsPercent}
+                  onChange={(e) => setCarbsPercent(parseInt(e.target.value) || 0)}
+                  className="mt-2"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="fat-percent">Gorduras (%)</Label>
+                <Input
+                  id="fat-percent"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={fatPercent}
+                  onChange={(e) => setFatPercent(parseInt(e.target.value) || 0)}
+                  className="mt-2"
+                />
+              </div>
+            </div>
+            
+            {proteinPercent + carbsPercent + fatPercent !== 100 && (
+              <div className="text-sm text-destructive mt-2">
+                ⚠️ A soma das porcentagens deve ser 100% (atual: {proteinPercent + carbsPercent + fatPercent}%)
+              </div>
+            )}
+            
+            <Button
+              onClick={calculateMacros}
+              disabled={proteinPercent + carbsPercent + fatPercent !== 100 || !isFormValid()}
+              className="w-full mt-4 bg-gradient-primary hover:opacity-90"
+            >
+              Recalcular com Nova Distribuição
+            </Button>
           </div>
         </Card>
       )}

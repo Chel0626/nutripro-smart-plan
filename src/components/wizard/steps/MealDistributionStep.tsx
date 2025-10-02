@@ -15,14 +15,16 @@ interface MealDistributionStepProps {
 export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: MealDistributionStepProps) => {
   const [largeMeals, setLargeMeals] = useState(initialTargets.length > 0 ? initialTargets.filter(m => m.type === "large").length : 3);
   const [smallMeals, setSmallMeals] = useState(initialTargets.length > 0 ? initialTargets.filter(m => m.type === "small").length : 2);
+  const [largePercentage, setLargePercentage] = useState(70);
+  const [smallPercentage, setSmallPercentage] = useState(30);
   const [distribution, setDistribution] = useState<MealTarget[]>(initialTargets);
 
   const calculateDistribution = () => {
     const totalMeals = largeMeals + smallMeals;
     
-    // Refeições grandes recebem 70% das calorias totais
-    const largePortionCalories = (macroData.totalCalories * 0.7) / largeMeals;
-    const smallPortionCalories = (macroData.totalCalories * 0.3) / smallMeals;
+    // Usa as porcentagens definidas pelo usuário
+    const largePortionCalories = (macroData.totalCalories * (largePercentage / 100)) / largeMeals;
+    const smallPortionCalories = (macroData.totalCalories * (smallPercentage / 100)) / smallMeals;
 
     const targets: MealTarget[] = [];
 
@@ -57,7 +59,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
     onComplete(targets);
   };
 
-  const isValid = largeMeals > 0 || smallMeals > 0;
+  const isValid = (largeMeals > 0 || smallMeals > 0) && (largePercentage + smallPercentage === 100);
 
   return (
     <div className="space-y-6">
@@ -91,23 +93,45 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
             <Pizza className="w-8 h-8 text-primary" />
             <div>
               <h3 className="font-semibold">Refeições Grandes</h3>
-              <p className="text-sm text-muted-foreground">70% das calorias totais</p>
+              <p className="text-sm text-muted-foreground">{largePercentage}% das calorias totais</p>
             </div>
           </div>
           
-          <Label htmlFor="large-meals">Quantidade</Label>
-          <Input
-            id="large-meals"
-            type="number"
-            min="0"
-            max="6"
-            value={largeMeals}
-            onChange={(e) => {
-              setLargeMeals(parseInt(e.target.value) || 0);
-              setDistribution([]);
-            }}
-            className="mt-2 text-lg font-semibold"
-          />
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="large-meals">Quantidade</Label>
+              <Input
+                id="large-meals"
+                type="number"
+                min="0"
+                max="6"
+                value={largeMeals}
+                onChange={(e) => {
+                  setLargeMeals(parseInt(e.target.value) || 0);
+                  setDistribution([]);
+                }}
+                className="mt-2 text-lg font-semibold"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="large-percentage">Porcentagem das Calorias</Label>
+              <Input
+                id="large-percentage"
+                type="number"
+                min="0"
+                max="100"
+                value={largePercentage}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 0;
+                  setLargePercentage(value);
+                  setSmallPercentage(100 - value);
+                  setDistribution([]);
+                }}
+                className="mt-2 text-lg font-semibold"
+              />
+            </div>
+          </div>
         </Card>
 
         <Card className="p-6 border-primary/20 hover:border-primary/40 transition-colors">
@@ -115,25 +139,53 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
             <Coffee className="w-8 h-8 text-primary" />
             <div>
               <h3 className="font-semibold">Refeições Pequenas (Lanches)</h3>
-              <p className="text-sm text-muted-foreground">30% das calorias totais</p>
+              <p className="text-sm text-muted-foreground">{smallPercentage}% das calorias totais</p>
             </div>
           </div>
           
-          <Label htmlFor="small-meals">Quantidade</Label>
-          <Input
-            id="small-meals"
-            type="number"
-            min="0"
-            max="6"
-            value={smallMeals}
-            onChange={(e) => {
-              setSmallMeals(parseInt(e.target.value) || 0);
-              setDistribution([]);
-            }}
-            className="mt-2 text-lg font-semibold"
-          />
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="small-meals">Quantidade</Label>
+              <Input
+                id="small-meals"
+                type="number"
+                min="0"
+                max="6"
+                value={smallMeals}
+                onChange={(e) => {
+                  setSmallMeals(parseInt(e.target.value) || 0);
+                  setDistribution([]);
+                }}
+                className="mt-2 text-lg font-semibold"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="small-percentage">Porcentagem das Calorias</Label>
+              <Input
+                id="small-percentage"
+                type="number"
+                min="0"
+                max="100"
+                value={smallPercentage}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 0;
+                  setSmallPercentage(value);
+                  setLargePercentage(100 - value);
+                  setDistribution([]);
+                }}
+                className="mt-2 text-lg font-semibold"
+              />
+            </div>
+          </div>
         </Card>
       </div>
+      
+      {largePercentage + smallPercentage !== 100 && (
+        <div className="text-sm text-destructive text-center">
+          ⚠️ A soma das porcentagens deve ser 100% (atual: {largePercentage + smallPercentage}%)
+        </div>
+      )}
 
       <Button
         onClick={calculateDistribution}
