@@ -17,6 +17,9 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
   const [smallMeals, setSmallMeals] = useState(initialTargets.length > 0 ? initialTargets.filter(m => m.type === "small").length : 2);
   const [largePercentage, setLargePercentage] = useState(70);
   const [smallPercentage, setSmallPercentage] = useState(30);
+  const [proteinPercent, setProteinPercent] = useState(30);
+  const [carbsPercent, setCarbsPercent] = useState(40);
+  const [fatPercent, setFatPercent] = useState(30);
   const [distribution, setDistribution] = useState<MealTarget[]>(initialTargets);
 
   const calculateDistribution = () => {
@@ -36,9 +39,9 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
         type: "large",
         name: mealNames[i] || `Refeição Grande ${i + 1}`,
         calories: Math.round(largePortionCalories),
-        protein: Math.round((largePortionCalories * 0.3) / 4),
-        carbs: Math.round((largePortionCalories * 0.4) / 4),
-        fat: Math.round((largePortionCalories * 0.3) / 9),
+        protein: Math.round((largePortionCalories * (proteinPercent / 100)) / 4),
+        carbs: Math.round((largePortionCalories * (carbsPercent / 100)) / 4),
+        fat: Math.round((largePortionCalories * (fatPercent / 100)) / 9),
       });
     }
 
@@ -49,9 +52,9 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
         type: "small",
         name: `Lanche ${i + 1}`,
         calories: Math.round(smallPortionCalories),
-        protein: Math.round((smallPortionCalories * 0.3) / 4),
-        carbs: Math.round((smallPortionCalories * 0.4) / 4),
-        fat: Math.round((smallPortionCalories * 0.3) / 9),
+        protein: Math.round((smallPortionCalories * (proteinPercent / 100)) / 4),
+        carbs: Math.round((smallPortionCalories * (carbsPercent / 100)) / 4),
+        fat: Math.round((smallPortionCalories * (fatPercent / 100)) / 9),
       });
     }
 
@@ -59,7 +62,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
     onComplete(targets);
   };
 
-  const isValid = (largeMeals > 0 || smallMeals > 0) && (largePercentage + smallPercentage === 100);
+  const isValid = (largeMeals > 0 || smallMeals > 0) && (largePercentage + smallPercentage === 100) && (proteinPercent + carbsPercent + fatPercent === 100);
 
   return (
     <div className="space-y-6">
@@ -181,9 +184,73 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
         </Card>
       </div>
       
+      {/* Macro Distribution */}
+      <Card className="p-6 border-primary/20">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <UtensilsCrossed className="w-5 h-5 text-primary" />
+          Distribuição de Macronutrientes
+        </h3>
+        
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="protein-percent">Proteína (%)</Label>
+            <Input
+              id="protein-percent"
+              type="number"
+              min="0"
+              max="100"
+              value={proteinPercent}
+              onChange={(e) => {
+                setProteinPercent(parseInt(e.target.value) || 0);
+                setDistribution([]);
+              }}
+              className="mt-2 text-lg font-semibold"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="carbs-percent">Carboidratos (%)</Label>
+            <Input
+              id="carbs-percent"
+              type="number"
+              min="0"
+              max="100"
+              value={carbsPercent}
+              onChange={(e) => {
+                setCarbsPercent(parseInt(e.target.value) || 0);
+                setDistribution([]);
+              }}
+              className="mt-2 text-lg font-semibold"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="fat-percent">Gorduras (%)</Label>
+            <Input
+              id="fat-percent"
+              type="number"
+              min="0"
+              max="100"
+              value={fatPercent}
+              onChange={(e) => {
+                setFatPercent(parseInt(e.target.value) || 0);
+                setDistribution([]);
+              }}
+              className="mt-2 text-lg font-semibold"
+            />
+          </div>
+        </div>
+        
+        {proteinPercent + carbsPercent + fatPercent !== 100 && (
+          <div className="text-sm text-destructive mt-3 text-center">
+            ⚠️ A soma deve ser 100% (atual: {proteinPercent + carbsPercent + fatPercent}%)
+          </div>
+        )}
+      </Card>
+      
       {largePercentage + smallPercentage !== 100 && (
         <div className="text-sm text-destructive text-center">
-          ⚠️ A soma das porcentagens deve ser 100% (atual: {largePercentage + smallPercentage}%)
+          ⚠️ A soma das porcentagens de refeições deve ser 100% (atual: {largePercentage + smallPercentage}%)
         </div>
       )}
 
