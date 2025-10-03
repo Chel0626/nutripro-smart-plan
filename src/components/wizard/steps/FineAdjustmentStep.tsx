@@ -133,7 +133,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <Label htmlFor={`protein-${meal.id}`} className="text-xs">Proteína (g)</Label>
+                    <Label htmlFor={`protein-${meal.id}`} className="text-xs">PTN (g)</Label>
                     <Input
                       id={`protein-${meal.id}`}
                       type="number"
@@ -144,7 +144,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                     />
                   </div>
                   <div>
-                    <Label htmlFor={`carbs-${meal.id}`} className="text-xs">Carboidrato (g)</Label>
+                    <Label htmlFor={`carbs-${meal.id}`} className="text-xs">CHO (g)</Label>
                     <Input
                       id={`carbs-${meal.id}`}
                       type="number"
@@ -155,7 +155,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                     />
                   </div>
                   <div>
-                    <Label htmlFor={`fat-${meal.id}`} className="text-xs">Gordura (g)</Label>
+                    <Label htmlFor={`fat-${meal.id}`} className="text-xs">LPD (g)</Label>
                     <Input
                       id={`fat-${meal.id}`}
                       type="number"
@@ -184,7 +184,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <Label htmlFor={`protein-${meal.id}`} className="text-xs">Proteína (g)</Label>
+                    <Label htmlFor={`protein-${meal.id}`} className="text-xs">PTN (g)</Label>
                     <Input
                       id={`protein-${meal.id}`}
                       type="number"
@@ -195,7 +195,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                     />
                   </div>
                   <div>
-                    <Label htmlFor={`carbs-${meal.id}`} className="text-xs">Carboidrato (g)</Label>
+                    <Label htmlFor={`carbs-${meal.id}`} className="text-xs">CHO (g)</Label>
                     <Input
                       id={`carbs-${meal.id}`}
                       type="number"
@@ -206,7 +206,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                     />
                   </div>
                   <div>
-                    <Label htmlFor={`fat-${meal.id}`} className="text-xs">Gordura (g)</Label>
+                    <Label htmlFor={`fat-${meal.id}`} className="text-xs">LPD (g)</Label>
                     <Input
                       id={`fat-${meal.id}`}
                       type="number"

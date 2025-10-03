@@ -6,6 +6,7 @@ import { MacroCalculatorStep } from "./steps/MacroCalculatorStep";
 import { MealDistributionStep } from "./steps/MealDistributionStep";
 import { FineAdjustmentStep } from "./steps/FineAdjustmentStep";
 import { PrescriptionStep } from "./steps/PrescriptionStep";
+import { Capacitor } from "@capacitor/core";
 
 export interface MacroData {
   totalCalories: number;
@@ -40,11 +41,26 @@ const STEPS = [
   { id: 4, title: "Prescrição Inteligente", description: "IA sugere alimentos" },
 ];
 
+// Detecta se está rodando como app nativo (APK)
+const isNativeApp = Capacitor.isNativePlatform();
+
+// Filtra os passos baseado na plataforma
+const getAvailableSteps = () => {
+  if (isNativeApp) {
+    // Remove o passo 4 (Prescrição Inteligente) quando for APK
+    return STEPS.filter(step => step.id !== 4);
+  }
+  return STEPS;
+};
+
 export const DietWizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [macroData, setMacroData] = useState<MacroData | null>(null);
   const [mealTargets, setMealTargets] = useState<MealTarget[]>([]);
+
+  const availableSteps = getAvailableSteps();
+  const maxStep = Math.max(...availableSteps.map(s => s.id));
 
   const canProgress = () => {
     switch (currentStep) {
@@ -60,7 +76,7 @@ export const DietWizard = () => {
   };
 
   const handleNext = () => {
-    if (canProgress() && currentStep < 4) {
+    if (canProgress() && currentStep < maxStep) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -89,11 +105,11 @@ export const DietWizard = () => {
             <div className="absolute top-5 left-0 right-0 h-1 bg-border -z-10">
               <div
                 className="h-full bg-gradient-primary transition-all duration-500"
-                style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+                style={{ width: `${((currentStep - 1) / (availableSteps.length - 1)) * 100}%` }}
               />
             </div>
 
-            {STEPS.map((step, index) => (
+            {availableSteps.map((step, index) => (
               <div
                 key={step.id}
                 className="flex flex-col items-center relative bg-background px-2"
@@ -166,7 +182,7 @@ export const DietWizard = () => {
               Voltar
             </Button>
 
-            {currentStep < 4 ? (
+            {currentStep < maxStep ? (
               <Button
                 onClick={handleNext}
                 disabled={!canProgress()}

@@ -35,8 +35,11 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
     let bmr: number;
     if (formData.gender === "Male") {
       bmr = 10 * formData.weight + 6.25 * formData.height - 5 * formData.age + 5;
-    } else {
+    } else if (formData.gender === "Female") {
       bmr = 10 * formData.weight + 6.25 * formData.height - 5 * formData.age - 161;
+    } else {
+      // Criança: fórmula simplificada baseada em peso e altura
+      bmr = 10 * formData.weight + 6.25 * formData.height - 5 * formData.age + 5;
     }
 
     // Multiplicadores de atividade
@@ -149,6 +152,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
                 <SelectContent>
                   <SelectItem value="Male">Masculino</SelectItem>
                   <SelectItem value="Female">Feminino</SelectItem>
+                  <SelectItem value="Child">Criança</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -240,13 +244,16 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
             </div>
           </div>
 
-          <button
-            className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition"
+          <Button
+            className="mt-4 w-full sm:w-auto"
+            variant="outline"
             onClick={() => {
               // Monta o texto do relatório
               const bmr = formData.gender === "Male"
                 ? 10 * formData.weight + 6.25 * formData.height - 5 * formData.age + 5
-                : 10 * formData.weight + 6.25 * formData.height - 5 * formData.age - 161;
+                : formData.gender === "Female"
+                ? 10 * formData.weight + 6.25 * formData.height - 5 * formData.age - 161
+                : 10 * formData.weight + 6.25 * formData.height - 5 * formData.age + 5;
               const activityMultipliers = {
                 "Sedentary": 1.2,
                 "Lightly Active": 1.375,
@@ -292,7 +299,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
             }}
           >
             Salvar Resultado em Arquivo
-          </button>
+          </Button>
         </Card>
       )}
     </div>

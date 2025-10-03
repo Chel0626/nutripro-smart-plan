@@ -17,9 +17,9 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
   const [smallMeals, setSmallMeals] = useState(initialTargets.length > 0 ? initialTargets.filter(m => m.type === "small").length : 2);
   const [largePercentage, setLargePercentage] = useState(70);
   const [smallPercentage, setSmallPercentage] = useState(30);
-  const [proteinPercent, setProteinPercent] = useState(30);
-  const [carbsPercent, setCarbsPercent] = useState(40);
-  const [fatPercent, setFatPercent] = useState(30);
+  const [proteinPercent, setProteinPercent] = useState(20);
+  const [carbsPercent, setCarbsPercent] = useState(45);
+  const [fatPercent, setFatPercent] = useState(35);
   const [distribution, setDistribution] = useState<MealTarget[]>(initialTargets);
 
   const calculateDistribution = () => {
@@ -275,22 +275,22 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
             {distribution.map((meal) => (
               <div
                 key={meal.id}
-                className="flex items-center justify-between p-3 bg-card rounded-lg"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-card rounded-lg gap-2"
               >
                 <div className="flex items-center gap-3">
                   {meal.type === "large" ? (
-                    <Pizza className="w-5 h-5 text-primary" />
+                    <Pizza className="w-5 h-5 text-primary flex-shrink-0" />
                   ) : (
-                    <Coffee className="w-5 h-5 text-primary" />
+                    <Coffee className="w-5 h-5 text-primary flex-shrink-0" />
                   )}
                   <span className="font-medium">{meal.name}</span>
                 </div>
                 
-                <div className="flex gap-4 text-sm">
-                  <span className="font-semibold">{meal.calories} kcal</span>
-                  <span className="text-info">{meal.protein}g PTN</span>
-                  <span className="text-warning">{meal.carbs}g CARB</span>
-                  <span className="text-accent">{meal.fat}g GOR</span>
+                <div className="flex flex-wrap gap-2 sm:gap-4 text-sm">
+                  <span className="font-semibold whitespace-nowrap">{meal.calories} kcal</span>
+                  <span className="text-info whitespace-nowrap">PTN {meal.protein}g</span>
+                  <span className="text-warning whitespace-nowrap">CHO {meal.carbs}g</span>
+                  <span className="text-accent whitespace-nowrap">LPD {meal.fat}g</span>
                 </div>
               </div>
             ))}
