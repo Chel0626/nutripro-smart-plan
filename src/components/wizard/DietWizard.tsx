@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -61,6 +61,11 @@ export const DietWizard = () => {
 
   const availableSteps = getAvailableSteps();
   const maxStep = Math.max(...availableSteps.map(s => s.id));
+
+  // Scroll para o topo sempre que mudar de step
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   const canProgress = () => {
     switch (currentStep) {
