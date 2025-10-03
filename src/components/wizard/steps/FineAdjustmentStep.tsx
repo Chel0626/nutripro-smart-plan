@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AlertCircle, Settings2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -37,48 +36,38 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
     setCurrentTotals(totals);
   };
 
-  const handleCaloriesChange = (mealId: string, newCalories: number) => {
+  const handleMacroChange = (mealId: string, macro: 'protein' | 'carbs' | 'fat', newValue: number) => {
     const updatedTargets = [...targets];
     const mealIndex = updatedTargets.findIndex((m) => m.id === mealId);
     const meal = updatedTargets[mealIndex];
-    const oldCalories = meal.calories;
-    const difference = newCalories - oldCalories;
+    const oldValue = meal[macro];
+    const diff = newValue - oldValue;
 
-    // Atualiza a refeição atual
-    meal.calories = newCalories;
-    meal.protein = Math.round((newCalories * 0.3) / 4);
-    meal.carbs = Math.round((newCalories * 0.4) / 4);
-    meal.fat = Math.round((newCalories * 0.3) / 9);
+    meal[macro] = newValue;
+    meal.calories = Math.round(meal.protein * 4 + meal.carbs * 4 + meal.fat * 9);
 
-    // Se redistribuição automática está ativa
-    if (autoRedistribute && difference !== 0) {
-      const sameMealType = updatedTargets.filter(
-        (m) => m.type === meal.type && m.id !== mealId
-      );
-
+    if (autoRedistribute && diff !== 0) {
+      const sameMealType = updatedTargets.filter((m) => m.type === meal.type && m.id !== mealId);
       if (sameMealType.length > 0) {
-        const redistributedDiff = Math.round(difference / sameMealType.length);
-
-        sameMealType.forEach((otherMeal) => {
-          const adjustedCalories = Math.max(100, otherMeal.calories - redistributedDiff);
-          otherMeal.calories = adjustedCalories;
-          otherMeal.protein = Math.round((adjustedCalories * 0.3) / 4);
-          otherMeal.carbs = Math.round((adjustedCalories * 0.4) / 4);
-          otherMeal.fat = Math.round((adjustedCalories * 0.3) / 9);
+        const redist = Math.trunc(diff / sameMealType.length);
+        sameMealType.forEach((otherMeal, idx) => {
+          if (idx === sameMealType.length - 1) {
+            otherMeal[macro] -= diff - redist * idx;
+          } else {
+            otherMeal[macro] -= redist;
+          }
+          otherMeal.calories = Math.round(otherMeal.protein * 4 + otherMeal.carbs * 4 + otherMeal.fat * 9);
         });
       }
     }
-
     setTargets(updatedTargets);
   };
 
-  const getDifference = (current: number, target: number) => {
-    const diff = current - target;
-    const percentage = ((diff / target) * 100).toFixed(1);
-    return { diff, percentage, isOff: Math.abs(diff) > target * 0.05 };
+  const caloriesDiff = {
+    diff: currentTotals.calories - totalMacros.totalCalories,
+    percentage: ((currentTotals.calories - totalMacros.totalCalories) / totalMacros.totalCalories * 100).toFixed(1),
+    isOff: currentTotals.calories !== totalMacros.totalCalories,
   };
-
-  const caloriesDiff = getDifference(currentTotals.calories, totalMacros.totalCalories);
 
   return (
     <div className="space-y-6">
@@ -88,11 +77,10 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
           Ajuste Fino da Distribuição
         </h2>
         <p className="text-muted-foreground mt-2">
-          Ajuste as calorias de cada refeição conforme necessário
+          Ajuste os macros de cada refeição conforme necessário
         </p>
       </div>
 
-      {/* Summary Status */}
       <Card className={`p-4 ${caloriesDiff.isOff ? "bg-warning/10 border-warning" : "bg-success-light border-success"}`}>
         <div className="flex items-center justify-between">
           <div>
@@ -101,7 +89,6 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
               {currentTotals.calories} / {totalMacros.totalCalories} kcal
             </div>
           </div>
-          
           <div className="text-right">
             {caloriesDiff.isOff ? (
               <span className="text-warning font-semibold">
@@ -114,7 +101,6 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
         </div>
       </Card>
 
-      {/* Auto-redistribution Toggle */}
       <Card className="p-4 bg-primary-light border-primary/30">
         <div className="flex items-center justify-between">
           <div>
@@ -122,7 +108,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
               Redistribuição Automática
             </Label>
             <p className="text-sm text-muted-foreground mt-1">
-              Quando ativa, ao aumentar calorias de uma refeição, as outras do mesmo tipo são reduzidas automaticamente
+              Quando ativa, ao alterar um macro de uma refeição, as outras do mesmo tipo são ajustadas automaticamente
             </p>
           </div>
           <Switch
@@ -133,48 +119,110 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
         </div>
       </Card>
 
-      {/* Meal Adjustments */}
-      <div className="space-y-3">
-        {targets.map((meal) => (
-          <Card key={meal.id} className="p-4 hover:border-primary/40 transition-colors">
-            <div className="grid md:grid-cols-2 gap-4 items-center">
-              <div>
-                <div className="font-semibold">{meal.name}</div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  PTN: {meal.protein}g • CARB: {meal.carbs}g • GOR: {meal.fat}g
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card className="p-4 border-primary/40">
+          <h3 className="font-bold text-primary mb-4 text-lg">Refeições Grandes</h3>
+          <div className="space-y-3">
+            {targets.filter(m => m.type === "large").map((meal) => (
+              <div key={meal.id} className="p-4 bg-primary-light/10 border-primary/20 rounded-lg">
+                <div className="mb-3">
+                  <div className="font-semibold">{meal.name}</div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {meal.calories} kcal
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label htmlFor={`protein-${meal.id}`} className="text-xs">Proteína (g)</Label>
+                    <Input
+                      id={`protein-${meal.id}`}
+                      type="number"
+                      value={meal.protein}
+                      min="0"
+                      onChange={e => handleMacroChange(meal.id, 'protein', parseInt(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`carbs-${meal.id}`} className="text-xs">Carboidrato (g)</Label>
+                    <Input
+                      id={`carbs-${meal.id}`}
+                      type="number"
+                      value={meal.carbs}
+                      min="0"
+                      onChange={e => handleMacroChange(meal.id, 'carbs', parseInt(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`fat-${meal.id}`} className="text-xs">Gordura (g)</Label>
+                    <Input
+                      id={`fat-${meal.id}`}
+                      type="number"
+                      value={meal.fat}
+                      min="0"
+                      onChange={e => handleMacroChange(meal.id, 'fat', parseInt(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </Card>
 
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Label htmlFor={`calories-${meal.id}`} className="text-sm">
-                    Calorias
-                  </Label>
-                  <Input
-                    id={`calories-${meal.id}`}
-                    type="number"
-                    value={meal.calories}
-                    onChange={(e) => handleCaloriesChange(meal.id, parseInt(e.target.value) || 0)}
-                    className="mt-1"
-                    min="0"
-                  />
+        <Card className="p-4 border-info/40">
+          <h3 className="font-bold text-info mb-4 text-lg">Refeições Pequenas (Lanches)</h3>
+          <div className="space-y-3">
+            {targets.filter(m => m.type === "small").map((meal) => (
+              <div key={meal.id} className="p-4 bg-info-light/10 border-info/20 rounded-lg">
+                <div className="mb-3">
+                  <div className="font-semibold">{meal.name}</div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {meal.calories} kcal
+                  </div>
                 </div>
-                <div className="text-right pt-5">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    meal.type === "large" 
-                      ? "bg-primary/20 text-primary" 
-                      : "bg-info/20 text-info"
-                  }`}>
-                    {meal.type === "large" ? "Grande" : "Lanche"}
-                  </span>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label htmlFor={`protein-${meal.id}`} className="text-xs">Proteína (g)</Label>
+                    <Input
+                      id={`protein-${meal.id}`}
+                      type="number"
+                      value={meal.protein}
+                      min="0"
+                      onChange={e => handleMacroChange(meal.id, 'protein', parseInt(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`carbs-${meal.id}`} className="text-xs">Carboidrato (g)</Label>
+                    <Input
+                      id={`carbs-${meal.id}`}
+                      type="number"
+                      value={meal.carbs}
+                      min="0"
+                      onChange={e => handleMacroChange(meal.id, 'carbs', parseInt(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`fat-${meal.id}`} className="text-xs">Gordura (g)</Label>
+                    <Input
+                      id={`fat-${meal.id}`}
+                      type="number"
+                      value={meal.fat}
+                      min="0"
+                      onChange={e => handleMacroChange(meal.id, 'fat', parseInt(e.target.value) || 0)}
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            ))}
+          </div>
+        </Card>
       </div>
 
-      {/* Warning if off target */}
       {caloriesDiff.isOff && (
         <Alert className="border-warning bg-warning/10">
           <AlertCircle className="h-4 w-4 text-warning" />

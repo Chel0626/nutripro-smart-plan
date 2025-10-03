@@ -126,7 +126,9 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                 max="100"
                 value={largePercentage}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
+                  let value = parseInt(e.target.value) || 0;
+                  if (value > 100) value = 100;
+                  if (value < 0) value = 0;
                   setLargePercentage(value);
                   setSmallPercentage(100 - value);
                   setDistribution([]);
@@ -172,7 +174,9 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                 max="100"
                 value={smallPercentage}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
+                  let value = parseInt(e.target.value) || 0;
+                  if (value > 100) value = 100;
+                  if (value < 0) value = 0;
                   setSmallPercentage(value);
                   setLargePercentage(100 - value);
                   setDistribution([]);

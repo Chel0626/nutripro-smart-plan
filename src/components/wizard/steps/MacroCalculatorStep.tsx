@@ -141,7 +141,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
             </div>
 
             <div>
-              <Label htmlFor="gender">Sexo Biológico</Label>
+              <Label htmlFor="gender">Sexo</Label>
               <Select value={formData.gender} onValueChange={(v) => handleInputChange("gender", v)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -240,6 +240,59 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
             </div>
           </div>
 
+          <button
+            className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition"
+            onClick={() => {
+              // Monta o texto do relatório
+              const bmr = formData.gender === "Male"
+                ? 10 * formData.weight + 6.25 * formData.height - 5 * formData.age + 5
+                : 10 * formData.weight + 6.25 * formData.height - 5 * formData.age - 161;
+              const activityMultipliers = {
+                "Sedentary": 1.2,
+                "Lightly Active": 1.375,
+                "Moderately Active": 1.55,
+                "Very Active": 1.725,
+              };
+              const activityFactor = activityMultipliers[formData.activityLevel];
+              const tdee = bmr * activityFactor;
+              const goalAdjustments = {
+                "Lose Fat": 0.8,
+                "Maintain Weight": 1.0,
+                "Gain Muscle": 1.15,
+              };
+              const goalFactor = goalAdjustments[formData.goal];
+              const maintenanceCalories = Math.round(tdee);
+              const goalCalories = Math.round(tdee * goalFactor);
+
+              const report =
+                `Taxa Metabólica Basal: ${bmr.toFixed(2)} kcal\n` +
+                `Fator de Atividade: ${activityFactor} (${formData.activityLevel})\n` +
+                `Calorias para Manutenção: ${maintenanceCalories} kcal\n` +
+                `Meta para o Objetivo: ${goalCalories} kcal (${formData.goal})\n` +
+                `\n` +
+                `Proteínas: ${macros.proteinGrams}g\n` +
+                `Carboidratos: ${macros.carbsGrams}g\n` +
+                `Gorduras: ${macros.fatGrams}g\n`;
+
+              // Salva no localStorage
+              localStorage.setItem("nutripro_macro_report", report);
+
+              // Salva como arquivo de texto
+              const blob = new Blob([report], { type: "text/plain" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "resultado_macros.txt";
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }, 100);
+            }}
+          >
+            Salvar Resultado em Arquivo
+          </button>
         </Card>
       )}
     </div>
