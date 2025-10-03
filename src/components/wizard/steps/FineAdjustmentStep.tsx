@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { AlertCircle, Settings2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, Settings2, Download } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { MealTarget, MacroData } from "../DietWizard";
 
@@ -34,6 +35,44 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
       { calories: 0, protein: 0, carbs: 0, fat: 0 }
     );
     setCurrentTotals(totals);
+  };
+
+  const handleSaveDistribution = () => {
+    const report = `DISTRIBUIÇÃO DE MACROS - AJUSTE FINO
+========================================
+
+TOTAIS:
+- Calorias: ${currentTotals.calories} kcal (Meta: ${totalMacros.totalCalories} kcal)
+- Proteína: ${currentTotals.protein}g (Meta: ${totalMacros.proteinGrams}g)
+- Carboidrato: ${currentTotals.carbs}g (Meta: ${totalMacros.carbsGrams}g)
+- Gordura: ${currentTotals.fat}g (Meta: ${totalMacros.fatGrams}g)
+
+REFEIÇÕES GRANDES:
+${targets.filter(m => m.type === "large").map(meal => `
+${meal.name}:
+  - Calorias: ${meal.calories} kcal
+  - PTN: ${meal.protein}g | CHO: ${meal.carbs}g | LPD: ${meal.fat}g
+`).join('')}
+
+REFEIÇÕES PEQUENAS (LANCHES):
+${targets.filter(m => m.type === "small").map(meal => `
+${meal.name}:
+  - Calorias: ${meal.calories} kcal
+  - PTN: ${meal.protein}g | CHO: ${meal.carbs}g | LPD: ${meal.fat}g
+`).join('')}
+
+Gerado em: ${new Date().toLocaleString('pt-BR')}
+`;
+
+    const blob = new Blob([report], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `distribuicao-macros-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleMacroChange = (mealId: string, macro: 'protein' | 'carbs' | 'fat', newValue: number) => {
@@ -119,6 +158,17 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
         </div>
       </Card>
 
+      <div className="flex justify-end">
+        <Button
+          onClick={handleSaveDistribution}
+          variant="outline"
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Salvar Distribuição
+        </Button>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-6">
         <Card className="p-4 border-primary/40">
           <h3 className="font-bold text-primary mb-4 text-lg">Refeições Grandes</h3>
@@ -140,6 +190,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                       value={meal.protein}
                       min="0"
                       onChange={e => handleMacroChange(meal.id, 'protein', parseInt(e.target.value) || 0)}
+                      onFocus={e => e.target.select()}
                       className="mt-1"
                     />
                   </div>
@@ -151,6 +202,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                       value={meal.carbs}
                       min="0"
                       onChange={e => handleMacroChange(meal.id, 'carbs', parseInt(e.target.value) || 0)}
+                      onFocus={e => e.target.select()}
                       className="mt-1"
                     />
                   </div>
@@ -162,6 +214,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                       value={meal.fat}
                       min="0"
                       onChange={e => handleMacroChange(meal.id, 'fat', parseInt(e.target.value) || 0)}
+                      onFocus={e => e.target.select()}
                       className="mt-1"
                     />
                   </div>
@@ -191,6 +244,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                       value={meal.protein}
                       min="0"
                       onChange={e => handleMacroChange(meal.id, 'protein', parseInt(e.target.value) || 0)}
+                      onFocus={e => e.target.select()}
                       className="mt-1"
                     />
                   </div>
@@ -202,6 +256,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                       value={meal.carbs}
                       min="0"
                       onChange={e => handleMacroChange(meal.id, 'carbs', parseInt(e.target.value) || 0)}
+                      onFocus={e => e.target.select()}
                       className="mt-1"
                     />
                   </div>
@@ -213,6 +268,7 @@ export const FineAdjustmentStep = ({ mealTargets, onUpdate, totalMacros }: FineA
                       value={meal.fat}
                       min="0"
                       onChange={e => handleMacroChange(meal.id, 'fat', parseInt(e.target.value) || 0)}
+                      onFocus={e => e.target.select()}
                       className="mt-1"
                     />
                   </div>

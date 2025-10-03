@@ -113,6 +113,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                   setLargeMeals(parseInt(e.target.value) || 0);
                   setDistribution([]);
                 }}
+                onFocus={e => e.target.select()}
                 className="mt-2 text-lg font-semibold"
               />
             </div>
@@ -133,6 +134,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                   setSmallPercentage(100 - value);
                   setDistribution([]);
                 }}
+                onFocus={e => e.target.select()}
                 className="mt-2 text-lg font-semibold"
               />
             </div>
@@ -161,6 +163,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                   setSmallMeals(parseInt(e.target.value) || 0);
                   setDistribution([]);
                 }}
+                onFocus={e => e.target.select()}
                 className="mt-2 text-lg font-semibold"
               />
             </div>
@@ -181,6 +184,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                   setLargePercentage(100 - value);
                   setDistribution([]);
                 }}
+                onFocus={e => e.target.select()}
                 className="mt-2 text-lg font-semibold"
               />
             </div>
@@ -208,6 +212,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                 setProteinPercent(parseInt(e.target.value) || 0);
                 setDistribution([]);
               }}
+              onFocus={e => e.target.select()}
               className="mt-2 text-lg font-semibold"
             />
           </div>
@@ -224,6 +229,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                 setCarbsPercent(parseInt(e.target.value) || 0);
                 setDistribution([]);
               }}
+              onFocus={e => e.target.select()}
               className="mt-2 text-lg font-semibold"
             />
           </div>
@@ -240,6 +246,7 @@ export const MealDistributionStep = ({ macroData, onComplete, initialTargets }: 
                 setFatPercent(parseInt(e.target.value) || 0);
                 setDistribution([]);
               }}
+              onFocus={e => e.target.select()}
               className="mt-2 text-lg font-semibold"
             />
           </div>

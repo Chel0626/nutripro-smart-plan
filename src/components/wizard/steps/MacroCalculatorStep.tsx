@@ -115,6 +115,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
                 placeholder="170"
                 value={formData.height || ""}
                 onChange={(e) => handleInputChange("height", parseFloat(e.target.value))}
+                onFocus={e => e.target.select()}
                 className="mt-1"
               />
             </div>
@@ -127,6 +128,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
                 placeholder="70"
                 value={formData.weight || ""}
                 onChange={(e) => handleInputChange("weight", parseFloat(e.target.value))}
+                onFocus={e => e.target.select()}
                 className="mt-1"
               />
             </div>
@@ -139,6 +141,7 @@ export const MacroCalculatorStep = ({ onComplete, initialData, initialMacros }: 
                 placeholder="30"
                 value={formData.age || ""}
                 onChange={(e) => handleInputChange("age", parseInt(e.target.value))}
+                onFocus={e => e.target.select()}
                 className="mt-1"
               />
             </div>
